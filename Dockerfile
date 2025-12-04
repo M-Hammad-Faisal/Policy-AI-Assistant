@@ -1,8 +1,8 @@
-# --- STAGE 1: Builder Stage ---
-FROM python:3.11-slim as builder
+# --- STAGE 1: Base Builder (Install Dependencies) ---
+FROM python:3.11-slim as base-builder
 
-# Install curl for Poetry installation
-RUN apt-get update && apt-get install -y curl \
+# Install necessary utilities and Git
+RUN apt-get update && apt-get install -y curl git \
     && rm -rf /var/lib/apt/lists/*
 
 # Environment variables for Poetry and venv location
@@ -20,37 +20,50 @@ RUN curl -sSL https://install.python-poetry.org/ -o install-poetry.py \
 
 WORKDIR /app
 
-# Copy and install dependencies
+# Copy lock files and install dependencies
 COPY pyproject.toml poetry.lock ./
-# --only main avoids errors with missing 'dev' group
+# Install only main dependencies (no dev group)
 RUN $POETRY_HOME/bin/poetry install --only main --no-root
 
-# --- STAGE 2: Final Image (Runtime) ---
+
+# --- STAGE 2: Ingest Builder (Create the Vector Index) ---
+FROM base-builder as ingest-builder
+
+# Copy source code and policy documents
+COPY src/ ./src/
+COPY policy_documents/ policy_documents/
+
+# Build the index. This generates the 'policy_index/' directory.
+RUN python3 src/ingest.py
+
+
+# --- STAGE 3: Final Image (Runtime) ---
 FROM python:3.11-slim AS runtime
 
 WORKDIR /app
 
-# Define VIRTUAL_ENV and update PATH for the runtime image
+# Set environment and PATH for the application
 ENV VIRTUAL_ENV=/app/.venv \
     PATH=/app/.venv/bin:$PATH \
-    # Set Python path for src layout
     PYTHONPATH=/app/src
 
-# Copy the entire virtual environment from the builder stage
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+# Copy the Python virtual environment (dependencies)
+COPY --from=base-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-# Copy the application code and data
+# Copy the application code and startup script
 COPY src/ ./src/
-COPY policy_documents/ policy_documents/
-COPY policy_index/ policy_index/
 COPY start.sh .
 
-# Make the startup script executable
+# Copy the generated policy_index from the ingest-builder stage
+COPY --from=ingest-builder /app/policy_index/ policy_index/
+
+# Set executable permission for the entrypoint script
 RUN chmod +x start.sh
 
-# Set placeholder environment variables (Actual values set by Cloud Run Secrets)
-ENV SLACK_BOT_TOKEN="DUMMY"
-ENV GOOGLE_API_KEY="DUMMY"
+# Set placeholder environment variables for clarity
+ENV SLACK_BOT_TOKEN="xoxb-"
+ENV SLACK_APP_TOKEN="xapp-1-"
+ENV GOOGLE_API_KEY="AIza"
 
 EXPOSE 8080
 

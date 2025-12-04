@@ -1,41 +1,38 @@
+"""Wrapper script to execute the shell build pipeline."""
+import logging
 import subprocess
 import sys
-import os
+from pathlib import Path
+from typing import NoReturn
+
+# Use the root logger for utility scripts
+logger = logging.getLogger(__name__)
 
 
-def run_build_script():
-    """Wrapper function to execute the build.sh shell script."""
+def run_build_script() -> NoReturn:
+    """Execute the build.sh shell script and exit with its status code."""
+    build_script_path = Path.cwd() / "build.sh"
 
-    # Ensure build.sh exists and is executable
-    build_script_path = os.path.join(os.getcwd(), "build.sh")
-    if not os.path.exists(build_script_path):
-        print(f"Error: build.sh not found at {build_script_path}", file=sys.stderr)
+    if not build_script_path.exists():
+        logger.error("Error: build.sh not found at %s", build_script_path)
         sys.exit(1)
 
-    if not os.access(build_script_path, os.X_OK):
-        print(
-            "Error: build.sh is not executable. Run: chmod +x build.sh",
-            file=sys.stderr,
-        )
+    if not build_script_path.stat().st_mode & 0o100:
+        logger.error("Error: build.sh is not executable. Run: chmod +x build.sh")
         sys.exit(1)
 
+    logger.info("--- Executing build.sh via Python wrapper ---")
     try:
-        # Execute the shell script using subprocess.run
-        # shell=True is needed to run a shell command directly
-        result = subprocess.run(
-            ["./build.sh"], check=True, stdout=sys.stdout, stderr=sys.stderr
-        )
+        result = subprocess.run([build_script_path], check=True, stdout=sys.stdout)
         sys.exit(result.returncode)
     except subprocess.CalledProcessError as e:
-        print(f"Build script failed with error code {e.returncode}", file=sys.stderr)
+        logger.exception("Build script failed with error code %s", e.returncode)
         sys.exit(e.returncode)
     except FileNotFoundError:
-        print(
-            "Error: build.sh not found. Ensure it is in the project root.",
-            file=sys.stderr,
-        )
+        logger.exception("Error: build.sh not found. Ensure it is in the project root.")
         sys.exit(1)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     run_build_script()
