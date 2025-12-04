@@ -1,0 +1,28 @@
+## CODE MAGE INFORMATION TECHNOLOGY SECURITY POLICY
+
+**Effective Date:** February 1, 2026
+**Document Owner:** IT Department
+**Policy Version:** 2.1
+
+### 1. Acceptable Use and Data Protection
+
+* **Company Equipment:** Company-owned devices (laptops, phones) are primarily for business use. Limited, reasonable personal use is permitted, provided it does not violate other policies or compromise security.
+* **Prohibited Content:** Employees shall not access, store, or distribute illegal, harassing, or offensive content using company resources.
+* **Confidential Data:** Confidential and proprietary company data must **never** be stored on personal devices or public cloud services (e.g., Dropbox, personal Google Drive) without explicit, written IT approval and appropriate encryption.
+
+### 2. Password and Access Control
+
+* **Password Complexity:** All user passwords must be at least **12 characters long** and include a combination of uppercase letters, lowercase letters, numbers, and symbols.
+* **Multi-Factor Authentication (MFA):** MFA is mandatory for accessing all cloud services and internal corporate VPNs.
+* **Sharing:** User account passwords and access credentials must never be shared with anyone, including colleagues or management.
+* **Screen Lock:** Employees must lock their screens (`Win+L` or `Cmd+Ctrl+Q`) when leaving their workstation unattended. Screens must auto-lock after **5 minutes** of inactivity.
+
+### 3. Incident Reporting
+
+* **Reporting Obligation:** Any suspected security incident, including unauthorized access, loss or theft of a company device, phishing attempts, or malware infection, must be reported immediately.
+* **Reporting Contact:** Report incidents to the IT Security Team via the ticketing system or directly calling the emergency line: 555-AMGE-IT. **Do not** attempt to fix the issue yourself unless instructed by IT.
+
+### 4. Email and Internet Use
+
+* **Phishing:** Employees must exercise caution with external emails. Never click on links or download attachments from unknown or suspicious sources.
+* **Software Installation:** Employees are **prohibited** from installing any unauthorized software, browser extensions, or applications on company devices. All software must be installed or approved by the IT Department.

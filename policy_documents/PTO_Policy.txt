@@ -1,0 +1,31 @@
+## CODE MAGE PAID TIME OFF (PTO) POLICY
+
+**Effective Date:** January 1, 2026
+**Document Owner:** Human Resources Department
+**Policy Version:** 1.0
+
+### 1. Eligibility and Accrual
+
+* **Eligibility:** All regular full-time and part-time employees are eligible for PTO benefits. Part-time employee PTO is prorated based on scheduled hours.
+* **Accrual Rate:**
+    * **New Hires (0-2 years):** Employees accrue 1.66 days of PTO per full month worked (20 days/year).
+    * **Mid-Level (3-5 years):** Employees accrue 2.08 days of PTO per full month worked (25 days/year).
+    * **Senior (6+ years):** Employees accrue 2.5 days of PTO per full month worked (30 days/year).
+* **Maximum Accrual (Cap):** Employees may accrue up to 240 hours (30 days) of PTO. Accrual will pause once this cap is reached.
+
+### 2. Request and Approval Process
+
+* **Request Method:** All PTO requests must be submitted through the designated internal HR portal (e.g., ADP, Workday).
+* **Notice Period:**
+    * **Vacation/Personal Time:** Employees must submit requests at least **two (2) weeks** in advance.
+    * **Sick/Emergency Leave:** Employees should notify their supervisor as soon as possible, ideally **one (1) hour** before their scheduled start time.
+* **Approval:** Requests are subject to manager approval based on business needs and departmental coverage. The company reserves the right to deny requests during critical business periods ("Blackout Dates"), which will be communicated at least 30 days in advance.
+
+### 3. Rollover and Payout
+
+* **Carryover (Rollover):** Employees may carry over up to **40 hours (5 days)** of unused PTO into the next calendar year. Any time above this limit is forfeited on December 31st.
+* **Payout upon Separation:** In compliance with state law, employees separating from the company (voluntary or involuntary) will be paid out for all accrued, unused PTO at their current base rate of pay.
+
+### 4. Use of PTO
+
+PTO is a single pool of time to be used for vacation, personal days, and sick leave. It does not include company-paid holidays.
