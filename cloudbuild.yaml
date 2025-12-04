@@ -28,6 +28,9 @@ steps:
       - '${_REGION}'
       - '--min-instances'
       - '1'
+      # Set non-secret configuration variables (optional but good practice)
+      - '--set-env-vars'
+      - 'PYTHONUNBUFFERED=1'
       # Set critical environment variables and reference Secret Manager secrets
       - '--set-secrets'
       - 'SLACK_BOT_TOKEN=slack-bot-token:latest,SLACK_APP_TOKEN=slack-app-token:latest,GOOGLE_API_KEY=google-api-key:latest,HF_TOKEN=hf-token:latest'

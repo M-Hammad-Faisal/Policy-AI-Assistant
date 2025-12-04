@@ -12,8 +12,6 @@ from .logging_config import logger
 
 if TYPE_CHECKING:
     from llama_index.core.base.response.schema import RESPONSE_TYPE
-    from llama_index.core.embeddings import BaseEmbedding
-    from llama_index.core.llms import LLM
     from llama_index.core.query_engine import BaseQueryEngine
 
 QUERY_ENGINE: BaseQueryEngine | None = None
@@ -27,9 +25,14 @@ def initialize_rag_settings() -> None:
 
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-    Settings.llm = GoogleGenAI(model="gemini-2.5-flash")
-    Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
-    logger.info("LLM and Embedding models configured.")
+    # Configure LLM and Embedding models
+    try:
+        Settings.llm = GoogleGenAI(model="gemini-2.5-flash")
+        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+        logger.info("LLM and Embedding models configured.")
+    except Exception as e:
+        logger.exception("FATAL: Failed to configure LLM/Embedding: %s", e)
+        os._exit(1)
 
 
 def initialize_query_engine() -> None:

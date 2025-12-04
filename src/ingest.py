@@ -51,7 +51,9 @@ def build_knowledge_base() -> None:
     # 4. Create the Index
     logger.info("Creating vector embeddings and building index...")
     index: VectorStoreIndex = VectorStoreIndex.from_documents(
-        documents, embed_model=embed_model, show_progress=True
+        documents,
+        embed_model=embed_model,
+        show_progress=True,
     )
 
     # 5. Save the Index to disk
