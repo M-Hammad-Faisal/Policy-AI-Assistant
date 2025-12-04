@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "policy_assistant"
+version = "0.1.0"
+description = "A Slack bot for policy inquiries using RAG and Gemini."
+authors = ["Muhammad Hammad Faisal <hammadfaisal178@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "policy_assistant", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+slack-bolt = "^1.27.0"
+python-dotenv = "^1.2.1"
+llama-index-core = "^0.14.9"
+llama-index-llms-google-genai = "^0.7.4"
+llama-index-embeddings-huggingface = "^0.6.1"
+pypdf = "^6.4.0"
