@@ -1,36 +1,39 @@
+"""Core module for LlamaIndex setup, initialization, and RAG querying."""
+from __future__ import annotations
+
 import os
-from typing import Optional, Any
-from llama_index.core import StorageContext, load_index_from_storage
-from llama_index.core.query_engine import BaseQueryEngine
-from llama_index.core import Settings
-from llama_index.llms.google_genai import GoogleGenAI
+from typing import TYPE_CHECKING
+
+from llama_index.core import Settings, StorageContext, load_index_from_storage
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.llms.google_genai import GoogleGenAI
+
 from .logging_config import logger
 
+if TYPE_CHECKING:
+    from llama_index.core.base.response.schema import RESPONSE_TYPE
+    from llama_index.core.embeddings import BaseEmbedding
+    from llama_index.core.llms import LLM
+    from llama_index.core.query_engine import BaseQueryEngine
+
+QUERY_ENGINE: BaseQueryEngine | None = None
+
 INDEX_STORAGE_DIR: str = "policy_index"
-QUERY_ENGINE: Optional[BaseQueryEngine] = None
 
 
 def initialize_rag_settings() -> None:
-    """Configures global LlamaIndex settings (LLM and Embedding model)."""
+    """Configure global LlamaIndex settings (LLM and Embedding model)."""
     logger.info("Configuring global LlamaIndex settings...")
 
-    # Suppress tokenizers warning by disabling parallelism
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-    try:
-        # Requires GOOGLE_API_KEY
-        Settings.llm = GoogleGenAI(model="gemini-2.5-flash")
-        # Requires HF_TOKEN
-        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
-        logger.info("LLM and Embedding models configured.")
-    except Exception as e:
-        logger.error(f"FATAL: Failed to configure LLM/Embedding: {e}", exc_info=True)
-        os._exit(1)
+    Settings.llm = GoogleGenAI(model="gemini-2.5-flash")
+    Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+    logger.info("LLM and Embedding models configured.")
 
 
 def initialize_query_engine() -> None:
-    """Loads the saved vector index and creates the global query engine."""
+    """Load the saved vector index and create the global query engine."""
     global QUERY_ENGINE
 
     logger.info("Loading vector index from disk...")
@@ -42,15 +45,14 @@ def initialize_query_engine() -> None:
         logger.info("✅ Query Engine successfully loaded.")
 
     except FileNotFoundError:
-        logger.error(
-            f"FATAL ERROR: Index directory '{INDEX_STORAGE_DIR}' not found. Exiting."
-        )
+        logger.error("FATAL ERROR: Index directory '%s' not found. Exiting.", INDEX_STORAGE_DIR)
         os._exit(1)
 
 
-def query_policy(query_text: str) -> Any:
-    """Runs the query against the global RAG engine."""
+def query_policy(query_text: str) -> RESPONSE_TYPE:
+    """Run the query against the global RAG engine."""
     if QUERY_ENGINE is None:
-        raise RuntimeError("Query Engine is not initialized.")
+        error_msg = "Query Engine is not initialized."
+        raise RuntimeError(error_msg)
 
     return QUERY_ENGINE.query(query_text)

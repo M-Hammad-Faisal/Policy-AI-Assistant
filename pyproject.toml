@@ -6,6 +6,7 @@ authors = ["Muhammad Hammad Faisal <hammadfaisal178@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{ include = "policy_assistant", from = "src" }]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -34,12 +35,18 @@ line-length = 99
 
 [tool.ruff.lint]
 select = ["ALL"]
+ignore = ["ANN401", "BLE001", "COM812", "D211", "D213", "E501", "F401", "ISC001", "PLW0603", "S603", ]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-line-ending = "auto"
-skip-magic-trailing-comma = true
+docstring-code-format = true
+docstring-code-line-length = 88
+exclude = [
+    ".git",
+    ".venv",
+]
+
 
 [build-system]
 requires = ["poetry-core"]
