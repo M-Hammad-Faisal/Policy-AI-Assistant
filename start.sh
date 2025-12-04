@@ -1,15 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Cloud Run assigns the PORT environment variable.
 PORT=${PORT:-8080}
 
 # Define the absolute path to the Python executable inside the venv
-PYTHON_EXECUTABLE=$(pwd)"/.venv/bin/python"
+# Note: In Docker, the venv is at /app/.venv/bin/python
+PYTHON_EXECUTABLE=/app/.venv/bin/python
 
-# 1. Start the main Slack Bot application in the background.
-echo "Starting Socket Mode Slack Bot..."
-$PYTHON_EXECUTABLE src/policy_assistant/app.py &
-
-# 2. Start a simple HTTP server to satisfy the Cloud Run health check.
-echo "Starting Dummy HTTP server on port $PORT..."
-/usr/local/bin/python -m http.server $PORT
+# Start the main Slack Bot application, binding it to the exposed port.
+# You need to adjust app.py to listen on the $PORT variable.
+echo "Starting Socket Mode Slack Bot on port $PORT..."
+exec "$PYTHON_EXECUTABLE" src/policy_assistant/app.py
