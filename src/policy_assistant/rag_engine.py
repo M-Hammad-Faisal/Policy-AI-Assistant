@@ -1,6 +1,5 @@
 import os
-
-from typing import Any, Optional
+from typing import Optional, Any
 from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.core.query_engine import BaseQueryEngine
 from llama_index.core import Settings
@@ -8,13 +7,17 @@ from llama_index.llms.google_genai import GoogleGenAI
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from .logging_config import logger
 
-INDEX_STORAGE_DIR = "policy_index"
+INDEX_STORAGE_DIR: str = "policy_index"
 QUERY_ENGINE: Optional[BaseQueryEngine] = None
 
 
 def initialize_rag_settings() -> None:
     """Configures global LlamaIndex settings (LLM and Embedding model)."""
     logger.info("Configuring global LlamaIndex settings...")
+
+    # Suppress tokenizers warning by disabling parallelism
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
     try:
         # Requires GOOGLE_API_KEY
         Settings.llm = GoogleGenAI(model="gemini-2.5-flash")
@@ -24,7 +27,7 @@ def initialize_rag_settings() -> None:
         )
         logger.info("LLM and Embedding models configured.")
     except Exception as e:
-        logger.error(f"Failed to configure LLM/Embedding: {e}", exc_info=True)
+        logger.error(f"FATAL: Failed to configure LLM/Embedding: {e}", exc_info=True)
         os._exit(1)
 
 
@@ -41,7 +44,7 @@ def initialize_query_engine() -> None:
         logger.info("✅ Query Engine successfully loaded.")
 
     except FileNotFoundError:
-        logger.error(f"FATAL ERROR: Index directory '{INDEX_STORAGE_DIR}' not found.")
+        logger.error(f"FATAL ERROR: Index directory '{INDEX_STORAGE_DIR}' not found. Exiting.")
         os._exit(1)
 
 

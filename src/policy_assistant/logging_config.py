@@ -1,22 +1,20 @@
 import logging
+from typing import Final
 
+# Define the application name for the logger instance
+APP_NAME: Final[str] = "policy-assistant"
 
-def setup_logging(level=logging.INFO):
+def setup_logging(level=logging.INFO) -> logging.Logger:
     """
     Sets up the global logging configuration for the application.
-    Call this once at the very start of the main script (e.g., in app.py).
     """
     # Use standard format suitable for Cloud Logging
     logging.basicConfig(
         level=level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    # Return the logger for the main module (optional, but good practice)
-    return logging.getLogger("policy-assistant")
+    return logging.getLogger(APP_NAME)
 
-
-# Set up logging immediately so any module importing this file benefits
-logger = logging.getLogger("policy-assistant")
-
-# Call the setup function to configure the root logger
+# Get the logger instance that will be imported across all modules
+logger = logging.getLogger(APP_NAME)
 setup_logging()

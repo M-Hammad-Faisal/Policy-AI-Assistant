@@ -1,9 +1,10 @@
+import logging
 import os
 import re
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 # Import the configured logger and the RAG functions
 from .logging_config import logger
@@ -17,7 +18,7 @@ from .rag_engine import (
 # --- APP SETUP ---
 
 load_dotenv()
-initialize_rag_settings()  # Configure LLM/Embedding first
+initialize_rag_settings()  # Configure LLM/Embedding settings
 
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
@@ -25,7 +26,7 @@ app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 # --- EVENT HANDLER ---
 
 @app.event("app_mention")
-def handle_policy_query(body: Dict[str, Any], say: Any, logger: logging.Logger) -> None:
+def handle_policy_query(body: Dict[str, Any], say: Any) -> None:
     """
     Handles user mention, posts a placeholder, runs RAG query, and updates the message.
     """
@@ -46,20 +47,30 @@ def handle_policy_query(body: Dict[str, Any], say: Any, logger: logging.Logger) 
     ack_message: str = f"Thanks, <@{user_id}>! I'm looking up '{query_text}' now. Please wait a moment..."
     ack_response: Dict[str, Any] = say(ack_message)
     message_ts: str = ack_response['ts']
+    logger.info(f"Placeholder message posted with ts: {message_ts}")
 
     try:
-        # 2. Query the RAG Engine (Calls function in rag_engine.py)
+        # 2. Query the RAG Engine
         logger.info("Running RAG query...")
         response: Any = query_policy(query_text)
         logger.info("RAG query completed.")
 
-        # 3. Format the Final Response (similar to previous version)
+        # 3. Format the Final Response
         sources: set = set()
         for node in response.source_nodes:
             sources.add(node.metadata.get('file_name', 'Unknown Source'))
         source_list: str = "\n".join([f"- {s}" for s in sources])
 
-        final_answer_text: str = f"""{str(response)}\n\n---\n\n*📚 Sources Used:*{source_list}\n\n_Disclaimer: This information is AI-generated..._"""
+        final_answer_text: str = f"""
+        {str(response)}
+
+        ---
+
+        *📚 Sources Used:*
+        {source_list}
+
+        _Disclaimer: This information is AI-generated based on the latest company policies and should be used as a guide._
+        """
 
         # 4. UPDATE the placeholder message
         logger.info(f"Updating message {message_ts} with final answer.")
@@ -77,7 +88,6 @@ def handle_policy_query(body: Dict[str, Any], say: Any, logger: logging.Logger) 
 if __name__ == "__main__":
     logger.info("--- ATTEMPTING SOCKET MODE CONNECTION ---")
 
-    # Initialization is now a quick call to the external function
     initialize_query_engine()
 
     logger.info("\n🚀 Policy AI Assistant is starting up in Socket Mode...")
