@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 from slack_bolt import App
@@ -12,7 +11,7 @@ from .rag_engine import (
     initialize_rag_settings,
     initialize_query_engine,
     query_policy,
-    QUERY_ENGINE
+    QUERY_ENGINE,
 )
 
 # --- APP SETUP ---
@@ -25,6 +24,7 @@ app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
 # --- EVENT HANDLER ---
 
+
 @app.event("app_mention")
 def handle_policy_query(body: Dict[str, Any], say: Any) -> None:
     """
@@ -36,17 +36,17 @@ def handle_policy_query(body: Dict[str, Any], say: Any) -> None:
         return
 
     # Extract IDs and clean text
-    raw_text: str = body['event']['text']
-    user_id: str = body['event']['user']
-    channel_id: str = body['event']['channel']
-    query_text: str = re.sub(r'<@\w+>', '', raw_text).strip()
+    raw_text: str = body["event"]["text"]
+    user_id: str = body["event"]["user"]
+    channel_id: str = body["event"]["channel"]
+    query_text: str = re.sub(r"<@\w+>", "", raw_text).strip()
 
     logger.info(f"Received query from user {user_id}: {query_text}")
 
     # 1. Acknowledge and CAPTURE THE TIMESTAMP (ts)
     ack_message: str = f"Thanks, <@{user_id}>! I'm looking up '{query_text}' now. Please wait a moment..."
     ack_response: Dict[str, Any] = say(ack_message)
-    message_ts: str = ack_response['ts']
+    message_ts: str = ack_response["ts"]
     logger.info(f"Placeholder message posted with ts: {message_ts}")
 
     try:
@@ -58,8 +58,8 @@ def handle_policy_query(body: Dict[str, Any], say: Any) -> None:
         # 3. Format the Final Response
         sources: set = set()
         for node in response.source_nodes:
-            sources.add(node.metadata.get('file_name', 'Unknown Source'))
-        source_list: str = "\n".join([f"- {s}" for s in sources])
+            sources.add(node.metadata.get("file_name", "Unknown Source"))
+        source_list: str = "\n\t\t".join([f"- {s}" for s in sources])
 
         final_answer_text: str = f"""
         {str(response)}
@@ -74,7 +74,9 @@ def handle_policy_query(body: Dict[str, Any], say: Any) -> None:
 
         # 4. UPDATE the placeholder message
         logger.info(f"Updating message {message_ts} with final answer.")
-        app.client.chat_update(channel=channel_id, ts=message_ts, text=final_answer_text)
+        app.client.chat_update(
+            channel=channel_id, ts=message_ts, text=final_answer_text
+        )
         logger.info("Message update successful.")
 
     except Exception as e:

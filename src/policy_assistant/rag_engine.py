@@ -22,9 +22,7 @@ def initialize_rag_settings() -> None:
         # Requires GOOGLE_API_KEY
         Settings.llm = GoogleGenAI(model="gemini-2.5-flash")
         # Requires HF_TOKEN
-        Settings.embed_model = HuggingFaceEmbedding(
-            model_name="BAAI/bge-small-en-v1.5"
-        )
+        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         logger.info("LLM and Embedding models configured.")
     except Exception as e:
         logger.error(f"FATAL: Failed to configure LLM/Embedding: {e}", exc_info=True)
@@ -44,7 +42,9 @@ def initialize_query_engine() -> None:
         logger.info("✅ Query Engine successfully loaded.")
 
     except FileNotFoundError:
-        logger.error(f"FATAL ERROR: Index directory '{INDEX_STORAGE_DIR}' not found. Exiting.")
+        logger.error(
+            f"FATAL ERROR: Index directory '{INDEX_STORAGE_DIR}' not found. Exiting."
+        )
         os._exit(1)
 
 
