@@ -2,7 +2,8 @@
 
 This module initializes the Slack Bolt App and the RAG engine.
 It uses an integrated hybrid start (HTTP listener + Socket Mode connection)
-to deploy the application correctly to platforms like Cloud Run.
+to deploy the application correctly to platforms like Cloud Run, ensuring the
+HTTP listener starts immediately to pass health checks.
 """
 from __future__ import annotations
 
@@ -37,13 +38,19 @@ def handle_policy_query(body: dict[str, Any], say: Any) -> None:
     """Handle user mention, run the RAG query, and update the Slack message.
 
     The function posts a placeholder, executes the LlamaIndex query, and
-    then updates the original message with the answer and sources.
-    It includes an outer try/except block for graceful failure handling.
+    then performs lazy initialization of the RAG engine on the first call.
     """
+    # REMOVED: global QUERY_ENGINE - it is not assigned here.
+
     if QUERY_ENGINE is None:
-        say("I am still initializing my knowledge base. Please try again in a minute.")
-        logger.warning("Attempted query while QUERY_ENGINE was still None.")
-        return
+        say("I am starting up my knowledge base now. Please wait a few seconds and try again.")
+        logger.warning("Attempted query while QUERY_ENGINE was still None. Triggering lazy load.")
+
+        initialize_query_engine()
+
+        if QUERY_ENGINE is None:
+            say("I failed to initialize the knowledge base. Please check logs.")
+            return
 
     # Extract query text and user/channel IDs
     raw_text: str = body["event"]["text"]
@@ -106,10 +113,8 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 8080))
 
-    initialize_query_engine()
-
     logger.info(
-        f"🚀 Policy AI Assistant starting up. Binding HTTP port {port} for health checks...",
+        f"🚀 Policy AI Assistant starting up. Binding HTTP port {port} for health checks..."
     )
 
     # App.start() runs both the Socket Mode connection (via SLACK_APP_TOKEN)
