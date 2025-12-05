@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import threading
 from typing import TYPE_CHECKING
 
 from llama_index.core import Settings, StorageContext, load_index_from_storage
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
     from llama_index.core.query_engine import BaseQueryEngine
 
 QUERY_ENGINE: BaseQueryEngine | None = None
-
+LOCK = threading.Lock()
 INDEX_STORAGE_DIR: str = "policy_index"
 
 
@@ -25,7 +26,6 @@ def initialize_rag_settings() -> None:
 
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-    # Configure LLM and Embedding models
     try:
         Settings.llm = GoogleGenAI(model="gemini-2.5-flash")
         Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
@@ -36,20 +36,31 @@ def initialize_rag_settings() -> None:
 
 
 def initialize_query_engine() -> None:
-    """Load the saved vector index and create the global query engine."""
+    """Load the saved vector index and create the global query engine (thread-safe).
+
+    This function is called lazily upon the first user request.
+    """
     global QUERY_ENGINE
 
-    logger.info("Loading vector index from disk...")
-    try:
-        storage_context = StorageContext.from_defaults(persist_dir=INDEX_STORAGE_DIR)
-        index = load_index_from_storage(storage_context)
+    if QUERY_ENGINE is None:
+        with LOCK:
+            if QUERY_ENGINE is None:
+                logger.info("Loading vector index from disk...")
+                try:
+                    storage_context = StorageContext.from_defaults(persist_dir=INDEX_STORAGE_DIR)
+                    index = load_index_from_storage(storage_context)
 
-        QUERY_ENGINE = index.as_query_engine(similarity_top_k=3)
-        logger.info("✅ Query Engine successfully loaded.")
+                    QUERY_ENGINE = index.as_query_engine(similarity_top_k=3)
+                    logger.info("✅ Query Engine successfully loaded.")
 
-    except FileNotFoundError:
-        logger.error("FATAL ERROR: Index directory '%s' not found. Exiting.", INDEX_STORAGE_DIR)
-        os._exit(1)
+                except FileNotFoundError:
+                    logger.error(
+                        "FATAL ERROR: Index directory '%s' not found. Exiting.", INDEX_STORAGE_DIR
+                    )
+                    os._exit(1)
+                except Exception as e:
+                    logger.error("FATAL ERROR: Failed to load index: %s", e)
+                    os._exit(1)
 
 
 def query_policy(query_text: str) -> RESPONSE_TYPE:
